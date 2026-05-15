@@ -1,0 +1,19 @@
+# nixpacks.toml — Instructions de build pour Railway Nixpacks
+# https://nixpacks.com/docs/configuration/file
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "python3", "gcc", "gnumake"]
+
+[phases.install]
+cmds = ["npm ci --ignore-scripts"]
+
+[phases.build]
+cmds = [
+  # Rebuild les modules natifs (argon2) pour l'environnement Railway
+  "npm rebuild argon2",
+  # Compiler TypeScript → JavaScript
+  "npm run build"
+]
+
+[start]
+cmd = "node dist/main"
