@@ -1,13 +1,9 @@
-# ============================================================
-# railway.toml — TontineChain Backend
-# Utilise Nixpacks (builder auto Railway) — plus fiable que Dockerfile
-# ============================================================
-
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "node dist/main"
+startCommand = "node dist/src/main"
 healthcheckPath = "/api/v1/health"
 healthcheckTimeout = 90
 restartPolicyType = "ON_FAILURE"
