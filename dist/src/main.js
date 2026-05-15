@@ -1,10 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const compression = require("compression");
-const helmet_1 = require("helmet");
+const compression_1 = __importDefault(require("compression"));
+const helmet_1 = __importDefault(require("helmet"));
 const app_module_1 = require("./app.module");
 const jwt_auth_guard_1 = require("./common/guards/jwt-auth.guard");
 async function bootstrap() {
@@ -12,7 +15,7 @@ async function bootstrap() {
         rawBody: true,
     });
     app.use((0, helmet_1.default)());
-    app.use(compression());
+    app.use((0, compression_1.default)());
     app.enableCors({
         origin: process.env.CORS_ORIGIN || '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

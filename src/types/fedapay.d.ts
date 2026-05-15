@@ -1,5 +1,5 @@
 declare module 'fedapay' {
-  export default class FedaPay {
+  export class FedaPay {
     static setApiKey(key: string): void;
     static setEnvironment(env: 'sandbox' | 'live'): void;
 

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import FedaPay from 'fedapay';
+import { FedaPay } from 'fedapay';
 
 export interface FedaPayInitiatePayload {
   amount: number;
