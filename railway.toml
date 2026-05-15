@@ -1,0 +1,24 @@
+# ============================================================
+# railway.toml — Configuration Railway pour TontineChain Backend
+# https://docs.railway.app/reference/config-as-code
+# ============================================================
+
+[build]
+# Railway détecte automatiquement le Dockerfile à la racine
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Commande de démarrage (remplace CMD du Dockerfile si besoin)
+startCommand = "node dist/main"
+
+# Nombre de replicas (1 pour le hackathon, passer à 2+ en prod)
+numReplicas = 1
+
+# Timeout de démarrage (augmenté car argon2 peut prendre du temps à init)
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 60
+
+# Politique de redémarrage en cas de crash
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

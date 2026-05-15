@@ -1,0 +1,55 @@
+# Dépendances Node.js
+node_modules
+
+# Build output (recréé par Docker)
+dist
+
+# Fichiers de dev et de test
+**/*.spec.ts
+**/*.e2e-spec.ts
+test/
+coverage/
+
+# Fichiers d'environnement locaux (les variables sont injectées par Railway)
+.env
+.env.local
+.env.*.local
+
+# Clés cryptographiques locales (injectées via variables Railway)
+keys/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Artefacts de build hardhat/solidity (pas utiles en runtime backend)
+artifacts/
+cache/
+typechain-types/
+
+# Documentation
+README.md
+*.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase JSON de compte de service (les valeurs sont dans les variables d'env)
+*firebase-adminsdk*.json

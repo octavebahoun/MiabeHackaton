@@ -25,27 +25,35 @@ import * as path from 'path';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const privateKeyPath = configService.get<string>('JWT_PRIVATE_KEY_PATH');
-        const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH');
-        
         let privateKey = '';
         let publicKey = '';
-        
-        try {
-          privateKey = fs.readFileSync(path.resolve(process.cwd(), privateKeyPath), 'utf8');
-          publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
-        } catch(e) {
-            console.warn('Could not read JWT keys. Using dummy keys for module initialization.');
+
+        // Stratégie 1 : Variables d'env directes (Railway, Docker, CI/CD)
+        const envPrivateKey = configService.get<string>('JWT_PRIVATE_KEY');
+        const envPublicKey  = configService.get<string>('JWT_PUBLIC_KEY');
+
+        if (envPrivateKey && envPublicKey) {
+          // Railway stocke les clés PEM avec des \n littéraux — on les restaure
+          privateKey = envPrivateKey.replace(/\\n/g, '\n');
+          publicKey  = envPublicKey.replace(/\\n/g, '\n');
+        } else {
+          // Stratégie 2 : Fichiers PEM locaux (développement)
+          try {
+            const privateKeyPath = configService.get<string>('JWT_PRIVATE_KEY_PATH');
+            const publicKeyPath  = configService.get<string>('JWT_PUBLIC_KEY_PATH');
+            privateKey = fs.readFileSync(path.resolve(process.cwd(), privateKeyPath), 'utf8');
+            publicKey  = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath),  'utf8');
+          } catch (e) {
+            console.warn('⚠️  Clés JWT introuvables. Générer avec : npm run keys:generate');
             privateKey = 'DUMMY_PRIVATE';
-            publicKey = 'DUMMY_PUBLIC';
+            publicKey  = 'DUMMY_PUBLIC';
+          }
         }
 
         return {
           privateKey,
           publicKey,
-          signOptions: {
-            algorithm: 'RS256',
-          },
+          signOptions: { algorithm: 'RS256' },
         };
       },
     }),
