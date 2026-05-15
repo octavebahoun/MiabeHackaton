@@ -1,0 +1,10 @@
+// ============================================================
+// docker-compose.yml
+// Orchestre les 4 services du projet TontineChain pour le
+// développement local et le staging :
+//   - backend  : API NestJS (port 3000)
+//   - postgres  : Base de données PostgreSQL 16 (port 5432)
+//   - redis     : Cache + Queue BullMQ (port 6379)
+//   - nginx     : Reverse proxy TLS (ports 80 / 443)
+// Toutes les variables sont lues depuis le fichier .env
+// ============================================================
