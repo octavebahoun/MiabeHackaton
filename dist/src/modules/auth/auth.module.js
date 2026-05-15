@@ -36,25 +36,31 @@ exports.AuthModule = AuthModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: async (configService) => {
-                    const privateKeyPath = configService.get('JWT_PRIVATE_KEY_PATH');
-                    const publicKeyPath = configService.get('JWT_PUBLIC_KEY_PATH');
                     let privateKey = '';
                     let publicKey = '';
-                    try {
-                        privateKey = fs.readFileSync(path.resolve(process.cwd(), privateKeyPath), 'utf8');
-                        publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
+                    const envPrivateKey = configService.get('JWT_PRIVATE_KEY');
+                    const envPublicKey = configService.get('JWT_PUBLIC_KEY');
+                    if (envPrivateKey && envPublicKey) {
+                        privateKey = envPrivateKey.replace(/\\n/g, '\n');
+                        publicKey = envPublicKey.replace(/\\n/g, '\n');
                     }
-                    catch (e) {
-                        console.warn('Could not read JWT keys. Using dummy keys for module initialization.');
-                        privateKey = 'DUMMY_PRIVATE';
-                        publicKey = 'DUMMY_PUBLIC';
+                    else {
+                        try {
+                            const privateKeyPath = configService.get('JWT_PRIVATE_KEY_PATH');
+                            const publicKeyPath = configService.get('JWT_PUBLIC_KEY_PATH');
+                            privateKey = fs.readFileSync(path.resolve(process.cwd(), privateKeyPath), 'utf8');
+                            publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
+                        }
+                        catch (e) {
+                            console.warn('⚠️  Clés JWT introuvables. Générer avec : npm run keys:generate');
+                            privateKey = 'DUMMY_PRIVATE';
+                            publicKey = 'DUMMY_PUBLIC';
+                        }
                     }
                     return {
                         privateKey,
                         publicKey,
-                        signOptions: {
-                            algorithm: 'RS256',
-                        },
+                        signOptions: { algorithm: 'RS256' },
                     };
                 },
             }),

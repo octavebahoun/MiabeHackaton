@@ -1,8 +1,11 @@
+import { Request } from 'express';
 import { ContributionsService } from './contributions.service';
+import { CyclesService } from '../cycles/cycles.service';
 import { InitiateContributionDto } from './dto/initiate-contribution.dto';
 export declare class ContributionsController {
     private readonly contributionsService;
-    constructor(contributionsService: ContributionsService);
+    private readonly cyclesService;
+    constructor(contributionsService: ContributionsService, cyclesService: CyclesService);
     initiate(user: any, dto: InitiateContributionDto): Promise<{
         contribution_id: string;
         payment_ref: string;
@@ -11,9 +14,8 @@ export declare class ContributionsController {
         currency: string;
         status: import("./entities/contribution.entity").ContributionStatus;
     }>;
-    cinetpayWebhook(payload: any, clientIp: string): Promise<{
-        code: string;
-        message: string;
+    fedapayWebhook(req: Request, payload: any, signature: string): Promise<{
+        received: boolean;
     }>;
     findByCycle(cycleId: string): Promise<import("./entities/contribution.entity").Contribution[]>;
     findMyHistory(user: any): Promise<import("./entities/contribution.entity").Contribution[]>;

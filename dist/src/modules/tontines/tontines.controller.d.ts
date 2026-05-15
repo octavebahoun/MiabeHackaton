@@ -37,4 +37,5 @@ export declare class TontinesController {
     updateMemberStatus(id: string, memberId: string, user: any, dto: UpdateMemberDto): Promise<{
         message: string;
     }>;
+    getCycles(id: string, user: any): Promise<import("../cycles/entities/cycle.entity").Cycle[]>;
 }

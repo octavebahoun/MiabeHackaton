@@ -44,6 +44,27 @@ let UsersService = class UsersService {
     async updateCreditScore(id, score) {
         await this.usersRepository.updateById(id, { credit_score: score });
     }
+    async getScoreById(requesterId, targetUserId) {
+        const target = await this.findById(targetUserId);
+        let score_label;
+        const score = Number(target.credit_score ?? 0);
+        if (score >= 90)
+            score_label = 'Excellent';
+        else if (score >= 70)
+            score_label = 'Bon';
+        else if (score >= 50)
+            score_label = 'Moyen';
+        else if (score >= 30)
+            score_label = 'Faible';
+        else
+            score_label = 'Très faible';
+        return {
+            user_id: target.id,
+            full_name: target.full_name,
+            credit_score: score,
+            score_label,
+        };
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

@@ -47,11 +47,14 @@ let UsersController = class UsersController {
     async updateMe(user, dto) {
         return this.usersService.updateProfile(user.id, dto);
     }
+    async getScore(targetId, user) {
+        return this.usersService.getScoreById(user.id, targetId);
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)('me'),
-    (0, swagger_1.ApiOperation)({ summary: 'Retourne le profil de l\'utilisateur connecté' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Mon profil complet' }),
     openapi.ApiResponse({ status: 200, type: Object }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -60,7 +63,7 @@ __decorate([
 ], UsersController.prototype, "getMe", null);
 __decorate([
     (0, common_1.Patch)('me'),
-    (0, swagger_1.ApiOperation)({ summary: 'Modifier son nom ou email' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Modifier mon profil (nom, email)' }),
     openapi.ApiResponse({ status: 200, type: require("./entities/user.entity").User }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
@@ -68,6 +71,17 @@ __decorate([
     __metadata("design:paramtypes", [user_entity_1.User, UpdateProfileDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateMe", null);
+__decorate([
+    (0, common_1.Get)(':id/score'),
+    (0, swagger_1.ApiOperation)({ summary: 'Score de fiabilité d\'un utilisateur' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '{ user_id, full_name, credit_score, score_label }' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Utilisateur introuvable' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getScore", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, swagger_1.ApiBearerAuth)(),

@@ -8,7 +8,9 @@ const helmet_1 = require("helmet");
 const app_module_1 = require("./app.module");
 const jwt_auth_guard_1 = require("./common/guards/jwt-auth.guard");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        rawBody: true,
+    });
     app.use((0, helmet_1.default)());
     app.use(compression());
     app.enableCors({

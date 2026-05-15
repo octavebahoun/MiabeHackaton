@@ -59,6 +59,10 @@ let TontinesController = class TontinesController {
     async updateMemberStatus(id, memberId, user, dto) {
         return this.tontinesService.updateMemberStatus(id, memberId, user.sub, dto.status);
     }
+    async getCycles(id, user) {
+        await this.tontinesService.findById(id, user.sub);
+        return this.cyclesService.findByTontine(id);
+    }
 };
 exports.TontinesController = TontinesController;
 __decorate([
@@ -155,6 +159,16 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object, update_member_dto_1.UpdateMemberDto]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "updateMemberStatus", null);
+__decorate([
+    (0, common_1.Get)(':id/cycles'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tous les cycles d\'une tontine avec leur statut' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Liste ordonnée des cycles' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], TontinesController.prototype, "getCycles", null);
 exports.TontinesController = TontinesController = __decorate([
     (0, swagger_1.ApiTags)('Tontines'),
     (0, swagger_1.ApiBearerAuth)(),

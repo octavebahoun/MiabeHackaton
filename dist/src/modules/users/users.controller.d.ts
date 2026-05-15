@@ -9,5 +9,11 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     getMe(user: User): Promise<any>;
     updateMe(user: User, dto: UpdateProfileDto): Promise<User>;
+    getScore(targetId: string, user: User): Promise<{
+        user_id: string;
+        full_name: string;
+        credit_score: number;
+        score_label: string;
+    }>;
 }
 export {};

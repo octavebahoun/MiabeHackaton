@@ -13,6 +13,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const bull_1 = require("@nestjs/bull");
 const throttler_1 = require("@nestjs/throttler");
 const core_1 = require("@nestjs/core");
+const ioredis_1 = require("@nestjs-modules/ioredis");
 const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
 const tontines_module_1 = require("./modules/tontines/tontines.module");
@@ -48,6 +49,17 @@ exports.AppModule = AppModule = __decorate([
                     entities: [user_entity_1.User, wallet_entity_1.Wallet, tontine_entity_1.Tontine, tontine_member_entity_1.TontineMember, contribution_entity_1.Contribution, cycle_entity_1.Cycle],
                     synchronize: config.get('NODE_ENV') !== 'production',
                     logging: config.get('NODE_ENV') === 'development',
+                }),
+            }),
+            ioredis_1.RedisModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                inject: [config_1.ConfigService],
+                useFactory: (config) => ({
+                    type: 'single',
+                    url: `redis://${config.get('REDIS_HOST', 'localhost')}:${config.get('REDIS_PORT', 6379)}`,
+                    options: {
+                        password: config.get('REDIS_PASSWORD') || undefined,
+                    },
                 }),
             }),
             bull_1.BullModule.forRootAsync({

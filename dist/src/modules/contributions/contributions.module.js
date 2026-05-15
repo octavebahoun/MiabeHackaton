@@ -14,6 +14,7 @@ const contributions_controller_1 = require("./contributions.controller");
 const contributions_service_1 = require("./contributions.service");
 const contribution_entity_1 = require("./entities/contribution.entity");
 const payments_module_1 = require("../payments/payments.module");
+const cycles_module_1 = require("../cycles/cycles.module");
 let ContributionsModule = class ContributionsModule {
 };
 exports.ContributionsModule = ContributionsModule;
@@ -22,6 +23,7 @@ exports.ContributionsModule = ContributionsModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([contribution_entity_1.Contribution]),
             payments_module_1.PaymentsModule,
+            (0, common_1.forwardRef)(() => cycles_module_1.CyclesModule),
             bull_1.BullModule.registerQueue({ name: 'blockchain-queue' }, { name: 'notifications-queue' }),
         ],
         controllers: [contributions_controller_1.ContributionsController],

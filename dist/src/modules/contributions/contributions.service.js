@@ -22,12 +22,12 @@ const ioredis_2 = require("ioredis");
 const bull_1 = require("@nestjs/bull");
 const crypto = require("crypto");
 const contribution_entity_1 = require("./entities/contribution.entity");
-const cinetpay_adapter_1 = require("../payments/cinetpay.adapter");
+const fedapay_adapter_1 = require("../payments/fedapay.adapter");
 const crypto_util_1 = require("../../common/utils/crypto.util");
 let ContributionsService = ContributionsService_1 = class ContributionsService {
-    constructor(contributionRepo, cinetPay, redis, blockchainQueue, notificationsQueue) {
+    constructor(contributionRepo, fedaPay, redis, blockchainQueue, notificationsQueue) {
         this.contributionRepo = contributionRepo;
-        this.cinetPay = cinetPay;
+        this.fedaPay = fedaPay;
         this.redis = redis;
         this.blockchainQueue = blockchainQueue;
         this.notificationsQueue = notificationsQueue;
@@ -38,11 +38,7 @@ let ContributionsService = ContributionsService_1 = class ContributionsService {
             throw new common_1.ConflictException('Ce cycle n\'est pas actif');
         }
         const already = await this.contributionRepo.findOne({
-            where: {
-                cycle_id: dto.cycle_id,
-                member_id: userId,
-                status: contribution_entity_1.ContributionStatus.CONFIRMED,
-            },
+            where: { cycle_id: dto.cycle_id, member_id: userId, status: contribution_entity_1.ContributionStatus.CONFIRMED },
         });
         if (already) {
             throw new common_1.ConflictException('Vous avez déjà cotisé pour ce cycle');
@@ -57,16 +53,18 @@ let ContributionsService = ContributionsService_1 = class ContributionsService {
             status: contribution_entity_1.ContributionStatus.PENDING,
         });
         await this.contributionRepo.save(contribution);
-        const { payment_url, code } = await this.cinetPay.initiatePayment({
+        const { payment_url, transaction_id } = await this.fedaPay.initiatePayment({
             amount: cycle.contribution_amount,
             currency: 'XOF',
             transaction_id: payment_ref,
             description: `Cotisation TontineChain — Cycle ${dto.cycle_id}`,
-            customer_name: userId,
+            customer_full_name: userId,
             customer_phone_number: dto.phone_number,
-            channels: 'MOBILE_MONEY',
         });
-        this.logger.log(`Paiement initié — ref: ${payment_ref}, code CinetPay: ${code}`);
+        await this.contributionRepo.update(contribution.id, {
+            cinetpay_trans_id: String(transaction_id),
+        });
+        this.logger.log(`Paiement initié — ref: ${payment_ref}, FedaPay tx: ${transaction_id}`);
         return {
             contribution_id: contribution.id,
             payment_ref,
@@ -76,47 +74,47 @@ let ContributionsService = ContributionsService_1 = class ContributionsService {
             status: contribution_entity_1.ContributionStatus.PENDING,
         };
     }
-    async handleCinetPayWebhook(payload, clientIp) {
-        const allowedIps = cinetpay_adapter_1.CinetPayAdapter.getAllowedIps();
-        const skipIpCheck = process.env.NODE_ENV !== 'production';
-        if (!skipIpCheck && !allowedIps.includes(clientIp)) {
-            this.logger.warn(`Webhook rejeté — IP non autorisée : ${clientIp}`);
-            throw new common_1.ForbiddenException('IP source non autorisée');
+    async handleFedaPayWebhook(payload, rawBody, signature) {
+        if (!this.fedaPay.verifyWebhookSignature(rawBody, signature)) {
+            throw new common_1.BadRequestException('Signature webhook FedaPay invalide');
         }
-        if (!this.cinetPay.verifyWebhookSignature(payload)) {
-            throw new common_1.BadRequestException('Signature webhook invalide');
+        const { event, data } = payload;
+        const ref = data?.object?.reference ?? data?.object?.['metadata']?.payment_ref;
+        const transactionId = data?.object?.id;
+        if (!ref && !transactionId) {
+            this.logger.warn('Webhook FedaPay sans référence exploitable');
+            return;
         }
-        const idempotenceKey = `webhook:cinetpay:${payload.cpm_trans_id}`;
+        const idempotenceKey = `webhook:fedapay:${transactionId ?? ref}`;
         const alreadyProcessed = await this.redis.set(idempotenceKey, 'processed', 'EX', 86_400, 'NX');
         if (!alreadyProcessed) {
-            this.logger.warn(`Webhook déjà traité — trans: ${payload.cpm_trans_id}`);
+            this.logger.warn(`Webhook déjà traité — tx: ${transactionId}`);
             return;
         }
         const contribution = await this.contributionRepo.findOne({
-            where: { payment_ref: payload.cpm_trans_id },
+            where: { payment_ref: ref },
         });
         if (!contribution) {
-            this.logger.error(`Contribution introuvable pour trans: ${payload.cpm_trans_id}`);
+            this.logger.error(`Contribution introuvable — ref: ${ref}`);
             return;
         }
-        const receivedAmount = parseFloat(payload.cpm_amount);
-        if (receivedAmount !== Number(contribution.amount)) {
+        const receivedAmount = data?.object?.amount;
+        if (receivedAmount && receivedAmount !== Number(contribution.amount)) {
             this.logger.error(`Montant incorrect — attendu: ${contribution.amount}, reçu: ${receivedAmount}`);
             await this.contributionRepo.update(contribution.id, { status: contribution_entity_1.ContributionStatus.FAILED });
             return;
         }
-        if (payload.cpm_result === '00') {
+        if (fedapay_adapter_1.FedaPayAdapter.isSuccessEvent(event)) {
             await this.contributionRepo.update(contribution.id, {
                 status: contribution_entity_1.ContributionStatus.CONFIRMED,
-                cinetpay_trans_id: payload.cpm_trans_id,
                 paid_at: new Date(),
             });
-            this.logger.log(`Paiement confirmé — ref: ${payload.cpm_trans_id}`);
             const proofHash = crypto
                 .createHash('sha256')
-                .update(`${contribution.id}:${contribution.amount}:${contribution.paid_at}`)
+                .update(`${contribution.id}:${contribution.amount}:${new Date().toISOString()}`)
                 .digest('hex');
             await this.contributionRepo.update(contribution.id, { proof_hash: proofHash });
+            this.logger.log(`Paiement FedaPay confirmé — ref: ${ref}`);
             await this.blockchainQueue.add('record-contribution-onchain', {
                 contribution_id: contribution.id,
                 cycle_id: contribution.cycle_id,
@@ -133,12 +131,14 @@ let ContributionsService = ContributionsService_1 = class ContributionsService {
                 amount: contribution.amount,
             });
         }
-        else {
+        else if (fedapay_adapter_1.FedaPayAdapter.isFailureEvent(event)) {
             await this.contributionRepo.update(contribution.id, {
                 status: contribution_entity_1.ContributionStatus.FAILED,
-                cinetpay_trans_id: payload.cpm_trans_id,
             });
-            this.logger.warn(`Paiement échoué — code: ${payload.cpm_result}, msg: ${payload.cpm_error_message}`);
+            this.logger.warn(`Paiement FedaPay échoué — event: ${event}, ref: ${ref}`);
+        }
+        else {
+            this.logger.log(`Événement FedaPay ignoré: ${event}`);
         }
     }
     async findByCycle(cycleId) {
@@ -159,7 +159,7 @@ exports.ContributionsService = ContributionsService = ContributionsService_1 = _
     __param(3, (0, bull_1.InjectQueue)('blockchain-queue')),
     __param(4, (0, bull_1.InjectQueue)('notifications-queue')),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        cinetpay_adapter_1.CinetPayAdapter,
+        fedapay_adapter_1.FedaPayAdapter,
         ioredis_2.default, Object, Object])
 ], ContributionsService);
 //# sourceMappingURL=contributions.service.js.map

@@ -13,4 +13,10 @@ export declare class UsersService {
         email?: string;
     }): Promise<User>;
     updateCreditScore(id: string, score: number): Promise<void>;
+    getScoreById(requesterId: string, targetUserId: string): Promise<{
+        user_id: string;
+        full_name: string;
+        credit_score: number;
+        score_label: string;
+    }>;
 }

@@ -8,21 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentsModule = void 0;
 const common_1 = require("@nestjs/common");
-const axios_1 = require("@nestjs/axios");
-const cinetpay_adapter_1 = require("./cinetpay.adapter");
+const fedapay_adapter_1 = require("./fedapay.adapter");
 let PaymentsModule = class PaymentsModule {
 };
 exports.PaymentsModule = PaymentsModule;
 exports.PaymentsModule = PaymentsModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            axios_1.HttpModule.register({
-                timeout: 10_000,
-                maxRedirects: 3,
-            }),
-        ],
-        providers: [cinetpay_adapter_1.CinetPayAdapter],
-        exports: [cinetpay_adapter_1.CinetPayAdapter],
+        providers: [fedapay_adapter_1.FedaPayAdapter],
+        exports: [fedapay_adapter_1.FedaPayAdapter],
     })
 ], PaymentsModule);
 //# sourceMappingURL=payments.module.js.map

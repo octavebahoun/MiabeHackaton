@@ -17,26 +17,35 @@ const openapi = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const contributions_service_1 = require("./contributions.service");
+const cycles_service_1 = require("../cycles/cycles.service");
 const initiate_contribution_dto_1 = require("./dto/initiate-contribution.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const common_2 = require("@nestjs/common");
 let ContributionsController = class ContributionsController {
-    constructor(contributionsService) {
+    constructor(contributionsService, cyclesService) {
         this.contributionsService = contributionsService;
+        this.cyclesService = cyclesService;
     }
     async initiate(user, dto) {
-        const cycleStub = {
-            id: dto.cycle_id,
-            tontine_id: 'stub',
-            status: 'ACTIVE',
-            contribution_amount: 50_000,
+        const cycle = await this.cyclesService.findById(dto.cycle_id);
+        if (!cycle)
+            throw new common_2.NotFoundException('Cycle introuvable');
+        if (cycle.status !== 'ACTIVE')
+            throw new common_2.ConflictException('Ce cycle n\'est pas actif');
+        const cycleRef = {
+            id: cycle.id,
+            tontine_id: cycle.tontine_id,
+            status: cycle.status,
+            contribution_amount: Number(cycle.tontine?.contribution_amount ?? 0),
         };
-        return this.contributionsService.initiate(user.sub, dto, cycleStub);
+        return this.contributionsService.initiate(user.sub, dto, cycleRef);
     }
-    async cinetpayWebhook(payload, clientIp) {
-        await this.contributionsService.handleCinetPayWebhook(payload, clientIp);
-        return { code: '00', message: 'OK' };
+    async fedapayWebhook(req, payload, signature) {
+        const rawBody = req.rawBody ?? JSON.stringify(payload);
+        await this.contributionsService.handleFedaPayWebhook(payload, rawBody, signature);
+        return { received: true };
     }
     async findByCycle(cycleId) {
         return this.contributionsService.findByCycle(cycleId);
@@ -50,8 +59,8 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)('initiate'),
-    (0, swagger_1.ApiOperation)({ summary: 'Initier un paiement de cotisation (MTN MoMo / Moov Money)' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Intention de paiement créée, lien CinetPay retourné' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Initier un paiement Mobile Money via FedaPay' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Lien de paiement FedaPay retourné' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -60,16 +69,17 @@ __decorate([
 ], ContributionsController.prototype, "initiate", null);
 __decorate([
     (0, public_decorator_1.Public)(),
-    (0, common_1.Post)('webhook/cinetpay'),
+    (0, common_1.Post)('webhook/fedapay'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, swagger_1.ApiOperation)({ summary: 'Webhook CinetPay (signature HMAC + IP whitelist)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Webhook FedaPay (signature HMAC-SHA256 via header)' }),
     openapi.ApiResponse({ status: common_1.HttpStatus.OK }),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Ip)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Headers)('x-fedapay-signature')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, Object, String]),
     __metadata("design:returntype", Promise)
-], ContributionsController.prototype, "cinetpayWebhook", null);
+], ContributionsController.prototype, "fedapayWebhook", null);
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -95,6 +105,7 @@ __decorate([
 exports.ContributionsController = ContributionsController = __decorate([
     (0, swagger_1.ApiTags)('Contributions'),
     (0, common_1.Controller)('contributions'),
-    __metadata("design:paramtypes", [contributions_service_1.ContributionsService])
+    __metadata("design:paramtypes", [contributions_service_1.ContributionsService,
+        cycles_service_1.CyclesService])
 ], ContributionsController);
 //# sourceMappingURL=contributions.controller.js.map
