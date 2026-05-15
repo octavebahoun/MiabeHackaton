@@ -7,16 +7,85 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": true,  "name": "tontineId",    "type": "bytes32" },
-      { "indexed": false, "name": "vaultAddress", "type": "address" }
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "tontineId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "vaultAddress",
+        "type": "address"
+      }
     ],
     "name": "TontineRegistered",
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "getAllTontines",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
-      { "internalType": "bytes32", "name": "tontineId",    "type": "bytes32" },
-      { "internalType": "address", "name": "vaultAddress", "type": "address" }
+      {
+        "internalType": "bytes32",
+        "name": "tontineId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getVault",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "tontineId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isRegistered",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "tontineId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "vaultAddress",
+        "type": "address"
+      }
     ],
     "name": "register",
     "outputs": [],
@@ -24,16 +93,21 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "bytes32", "name": "tontineId", "type": "bytes32" }],
-    "name": "getVault",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "bytes32", "name": "tontineId", "type": "bytes32" }],
-    "name": "isRegistered",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "vaults",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   }

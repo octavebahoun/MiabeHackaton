@@ -1,14 +1,22 @@
-// ============================================================
-// src/modules/payments/payments.service.ts — Service Paiements
-//
-// Rôle :
-//   - initiateCinetPay()     : appelle l'API CinetPay pour initier un paiement
-//                              Mobile Money (MTN MoMo / Moov Money)
-//                              Retourne : payment_url ou statut d'initiation
-//   - verifyCinetPayWebhook(): vérifie la signature HMAC-SHA256 du webhook
-//                              + vérifie IP source dans whitelist CinetPay
-//   - checkPaymentStatus()   : interroge CinetPay pour vérifier le statut
-//                              d'un paiement (polling en cas de webhook manqué)
-//   - pollPendingPayments()  : job récurrent (toutes les 5min) qui vérifie
-//                              les paiements PENDING depuis plus de 30min
-// ============================================================
+import { Injectable, Logger } from '@nestjs/common';
+import { FedaPayAdapter, FedaPayInitiatePayload } from './fedapay.adapter';
+
+@Injectable()
+export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
+
+  constructor(private readonly fedapayAdapter: FedaPayAdapter) {}
+
+  async initiatePayment(payload: FedaPayInitiatePayload) {
+    this.logger.log(`Initiation du paiement via PaymentsService pour ${payload.transaction_id}`);
+    return this.fedapayAdapter.initiatePayment(payload);
+  }
+
+  verifyWebhookSignature(rawBody: string, signature: string): boolean {
+    return this.fedapayAdapter.verifyWebhookSignature(rawBody, signature);
+  }
+
+  async checkPaymentStatus(transactionId: number) {
+    return this.fedapayAdapter.checkPaymentStatus(transactionId);
+  }
+}

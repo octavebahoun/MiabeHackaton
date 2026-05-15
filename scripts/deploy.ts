@@ -1,14 +1,33 @@
-// ============================================================
-// scripts/deploy.ts — Script de déploiement des smart contracts
-//
-// Rôle :
-//   - Script Hardhat exécuté avec : npx hardhat run scripts/deploy.ts --network mumbai
-//   - Étapes du déploiement :
-//       1. Déploie TontineRegistry.sol → récupère l'adresse du registre
-//       2. Affiche l'adresse à copier dans REGISTRY_CONTRACT_ADDRESS du .env
-//       3. Vérifie le contrat sur PolygonScan Mumbai (si ETHERSCAN_API_KEY présent)
-//   - Utilise ethers.js fourni par Hardhat
-//   - Lit BACKEND_WALLET_PRIVATE_KEY et POLYGON_RPC_URL depuis .env
-//   - Note : TontineVault.sol est déployé dynamiquement par le backend
-//     (un vault par tontine, pas à la main)
-// ============================================================
+import { ethers } from "hardhat";
+import * as fs from "fs";
+
+async function main() {
+  console.log("🚀 Démarrage du déploiement de TontineRegistry...");
+
+  const [deployer] = await ethers.getSigners();
+  if (!deployer) {
+    throw new Error("❌ Aucun compte de déploiement trouvé (BACKEND_WALLET_PRIVATE_KEY manquant).");
+  }
+
+  console.log(`📡 Compte de déploiement : ${deployer.address}`);
+  
+  const balance = await ethers.provider.getBalance(deployer.address);
+  console.log(`💰 Solde MATIC : ${ethers.formatEther(balance)} MATIC`);
+
+  const TontineRegistry = await ethers.getContractFactory("TontineRegistry");
+  const registry = await TontineRegistry.deploy();
+
+  await registry.waitForDeployment();
+
+  const registryAddress = await registry.getAddress();
+  console.log(`✅ TontineRegistry déployé à l'adresse : ${registryAddress}`);
+  console.log(`⚠️ ACTION REQUISE: Copiez cette adresse et mettez-la dans REGISTRY_CONTRACT_ADDRESS dans votre fichier .env\n`);
+  
+  // Exporter l'adresse dans un fichier json
+  fs.writeFileSync("registry-address.json", JSON.stringify({ registryAddress }, null, 2));
+}
+
+main().catch((error) => {
+  console.error("❌ Erreur pendant le déploiement :", error);
+  process.exitCode = 1;
+});

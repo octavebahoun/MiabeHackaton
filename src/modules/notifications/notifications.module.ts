@@ -1,10 +1,16 @@
-// ============================================================
-// src/modules/notifications/notifications.module.ts — Module Notifications
-//
-// Rôle :
-//   - Configure BullModule.registerQueue({ name: 'notifications-queue' })
-//   - Configure HttpModule pour les appels Firebase FCM et SMS provider
-//   - Déclare : NotificationsService, NotificationsWorker
-//   - Exporte NotificationsService (utilisé par Auth, Tontines, Contributions)
-//   - Les notifications sont toujours envoyées de manière asynchrone via BullMQ
-// ============================================================
+import { Module, Global } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
+import { NotificationsService } from './notifications.service';
+import { NotificationsProcessor } from './workers/notifications.processor';
+
+@Global()
+@Module({
+  imports: [
+    BullModule.registerQueue({
+      name: 'notifications-queue',
+    }),
+  ],
+  providers: [NotificationsService, NotificationsProcessor],
+  exports: [NotificationsService],
+})
+export class NotificationsModule {}

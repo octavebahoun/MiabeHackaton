@@ -16,6 +16,10 @@ import { WalletsModule }        from './modules/wallets/wallets.module';
 import { HealthModule }         from './modules/health/health.module';
 import { BlockchainModule }     from './modules/blockchain/blockchain.module';
 import { CyclesModule }         from './modules/cycles/cycles.module';
+import { NotificationsModule }  from './modules/notifications/notifications.module';
+import { AdminModule }          from './modules/admin/admin.module';
+import { ScoreModule }          from './modules/score/score.module';
+import { SanctionsModule }      from './modules/sanctions/sanctions.module';
 
 // Entités TypeORM
 import { User }                 from './modules/users/entities/user.entity';
@@ -86,6 +90,10 @@ import { Cycle }                from './modules/cycles/entities/cycle.entity';
     BlockchainModule,
     CyclesModule,
     HealthModule,
+    NotificationsModule,
+    AdminModule,
+    ScoreModule,
+    SanctionsModule,
   ],
   providers: [
     // Protection globale Rate Limit

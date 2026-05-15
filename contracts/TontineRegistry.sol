@@ -1,23 +1,35 @@
 // SPDX-License-Identifier: MIT
-// ============================================================
-// contracts/TontineRegistry.sol — Registre global des tontines
-//
-// Rôle :
-//   - Contrat unique déployé une seule fois par l'équipe TontineChain
-//   - Maintient un registre de tous les TontineVault.sol déployés
-//   - Fonctions principales :
-//       register(bytes32 tontineId, address vaultAddress)
-//           → Enregistre une nouvelle tontine et son vault (onlyOwner)
-//       getVault(bytes32 tontineId)
-//           → Retourne l'adresse du vault pour une tontine donnée
-//       isRegistered(bytes32 tontineId)
-//           → Vérifie si une tontine est bien enregistrée
-//       getAllTontines()
-//           → Retourne la liste de toutes les tontines enregistrées
-//   - Sécurité :
-//       Ownable : seul le deployer (backend wallet) peut enregistrer
-//       Mapping bytes32 → address pour les lookups O(1)
-//   - Émet des événements :
-//       TontineRegistered(bytes32 tontineId, address vaultAddress)
-// ============================================================
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract TontineRegistry is Ownable {
+    mapping(bytes32 => address) public vaults;
+    bytes32[] public allTontineIds;
+
+    event TontineRegistered(bytes32 indexed tontineId, address indexed vaultAddress);
+
+    constructor() Ownable(msg.sender) {}
+
+    function register(bytes32 tontineId, address vaultAddress) external onlyOwner {
+        require(vaults[tontineId] == address(0), "Tontine already registered");
+        require(vaultAddress != address(0), "Invalid vault address");
+
+        vaults[tontineId] = vaultAddress;
+        allTontineIds.push(tontineId);
+
+        emit TontineRegistered(tontineId, vaultAddress);
+    }
+
+    function getVault(bytes32 tontineId) external view returns (address) {
+        return vaults[tontineId];
+    }
+
+    function isRegistered(bytes32 tontineId) external view returns (bool) {
+        return vaults[tontineId] != address(0);
+    }
+
+    function getAllTontines() external view returns (bytes32[] memory) {
+        return allTontineIds;
+    }
+}

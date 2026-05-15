@@ -1,10 +1,11 @@
-// ============================================================
-// src/modules/sanctions/sanctions.module.ts — Module Sanctions
-//
-// Rôle :
-//   - Déclare : SanctionsService
-//   - Importe TypeOrmModule.forFeature([Contribution, TontineMember])
-//   - Importe NotificationsModule (alertes aux membres en retard)
-//   - Exporte SanctionsService
-//   - Hors périmètre MVP hackathon : implémentation complète en Phase 1
-// ============================================================
+import { Module } from '@nestjs/common';
+import { SanctionsService } from './sanctions.service';
+import { ScoreModule } from '../score/score.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+
+@Module({
+  imports: [ScoreModule, NotificationsModule],
+  providers: [SanctionsService],
+  exports: [SanctionsService],
+})
+export class SanctionsModule {}

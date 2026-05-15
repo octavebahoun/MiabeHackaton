@@ -1,14 +1,26 @@
-// ============================================================
-// src/modules/admin/admin.controller.ts — Contrôleur Admin
-//
-// Rôle :
-//   Expose les endpoints d'administration (ADMIN / SUPER_ADMIN uniquement) :
-//
-//   GET  /admin/stats          → Statistiques globales (users, tontines, volume XOF)
-//   GET  /admin/users          → Liste tous les utilisateurs (paginée)
-//   GET  /admin/tontines       → Liste toutes les tontines avec statuts
-//   POST /admin/blockchain/retry/:id → Relance manuellement un job blockchain échoué
-//   GET  /admin/health         → État détaillé de tous les services
-//
-//   Toutes les routes sont protégées par @Roles(Role.ADMIN, Role.SUPER_ADMIN)
-// ============================================================
+import { Controller, Post, Param, UseGuards, Patch } from '@nestjs/common';
+import { AdminService } from './admin.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+// Import roles guard here when created
+// import { RolesGuard } from '../../common/guards/roles.guard';
+// import { Roles } from '../../common/decorators/roles.decorator';
+// import { UserRole } from '../users/entities/user.entity';
+
+@Controller('admin')
+@UseGuards(JwtAuthGuard /*, RolesGuard*/)
+// @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+export class AdminController {
+  constructor(private readonly adminService: AdminService) {}
+
+  @Patch('users/:id/kyc-verify')
+  async verifyKyc(@Param('id') userId: string) {
+    await this.adminService.verifyKyc(userId);
+    return { message: 'KYC_VERIFIED' };
+  }
+
+  @Patch('users/:id/block')
+  async blockUser(@Param('id') userId: string) {
+    await this.adminService.blockUser(userId);
+    return { message: 'USER_BLOCKED' };
+  }
+}

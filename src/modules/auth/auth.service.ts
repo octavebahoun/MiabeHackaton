@@ -71,9 +71,11 @@ export class AuthService {
 
       // 5. Envoi SMS via BullMQ
       await this.notificationsQueue.add('send-sms', {
-        phone: dto.phone,
-        type: 'OTP_REGISTER',
-        otp,
+        type: 'sms',
+        payload: {
+          to: dto.phone,
+          message: `TontineChain - Votre code de vérification (OTP) est : ${otp}. Ne le partagez avec personne.`,
+        }
       });
 
       return {

@@ -1,8 +1,10 @@
-// ============================================================
-// src/modules/score/score.module.ts — Module Score de fiabilité
-//
-// Rôle :
-//   - Déclare : ScoreService
-//   - Importe TypeOrmModule.forFeature([Contribution]) pour lire l'historique
-//   - Exporte ScoreService (utilisé par ContributionsModule, UsersModule)
-// ============================================================
+import { Module } from '@nestjs/common';
+import { ScoreService } from './score.service';
+import { UsersModule } from '../users/users.module';
+
+@Module({
+  imports: [UsersModule],
+  providers: [ScoreService],
+  exports: [ScoreService],
+})
+export class ScoreModule {}

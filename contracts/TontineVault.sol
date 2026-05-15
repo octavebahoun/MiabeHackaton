@@ -1,27 +1,40 @@
 // SPDX-License-Identifier: MIT
-// ============================================================
-// contracts/TontineVault.sol — Contrat principal d'une tontine
-//
-// Rôle :
-//   - Un contrat par tontine, déployé par le backend au démarrage
-//   - Stocke on-chain les preuves de cotisation (proofHash)
-//     proofHash = keccak256(abi.encodePacked(contributionId, amount, timestamp))
-//   - Fonctions principales :
-//       recordContribution(cycleNumber, memberAddress, proofHash)
-//           → Enregistre une preuve de cotisation (onlyBackend)
-//       getContributions(cycleNumber)
-//           → Retourne toutes les preuves d'un cycle
-//       isContributionRecorded(cycleNumber, memberAddress)
-//           → Vérifie si un membre a cotisé pour un cycle donné
-//       payoutBeneficiary(cycleNumber, beneficiary, amount)
-//           → Déclenche le versement au bénéficiaire du cycle (onlyBackend)
-//   - Sécurité :
-//       modifier onlyBackend : seul le wallet backend peut écrire
-//       ReentrancyGuard : protection contre les attaques de réentrance
-//       Pausable : permet de geler le contrat en cas d'urgence
-//   - Hérite de : Ownable, ReentrancyGuard, Pausable (OpenZeppelin)
-//   - Émet des événements :
-//       ContributionRecorded(cycleNumber, memberAddress, proofHash)
-//       BeneficiaryPaid(cycleNumber, beneficiary, amount)
-// ============================================================
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract TontineVault is Ownable {
+    string public tontineId;
+    uint256 public currentCycle;
+    uint256 public totalContributions;
+
+    // cycleNumber => memberAddress => proofHash
+    mapping(uint256 => mapping(address => bytes32)) public contributionProofs;
+
+    event ContributionRecorded(uint256 indexed cycleNumber, address indexed memberAddress, bytes32 proofHash);
+    event CycleAdvanced(uint256 newCycle);
+
+    constructor(string memory _tontineId) Ownable(msg.sender) {
+        tontineId = _tontineId;
+        currentCycle = 1;
+        totalContributions = 0;
+    }
+
+    function recordContribution(uint256 _cycleNumber, address _memberAddress, bytes32 _proofHash) external onlyOwner {
+        require(contributionProofs[_cycleNumber][_memberAddress] == bytes32(0), "Contribution already recorded");
+        
+        contributionProofs[_cycleNumber][_memberAddress] = _proofHash;
+        totalContributions++;
+
+        emit ContributionRecorded(_cycleNumber, _memberAddress, _proofHash);
+    }
+
+    function advanceCycle() external onlyOwner {
+        currentCycle++;
+        emit CycleAdvanced(currentCycle);
+    }
+
+    function isContributionRecorded(uint256 _cycleNumber, address _memberAddress) external view returns (bool) {
+        return contributionProofs[_cycleNumber][_memberAddress] != bytes32(0);
+    }
+}

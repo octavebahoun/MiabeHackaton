@@ -42,6 +42,14 @@ export class UsersService {
     await this.usersRepository.updateById(id, { credit_score: score });
   }
 
+  async updateKycStatus(id: string, status: any): Promise<void> {
+    await this.usersRepository.updateById(id, { kyc_status: status });
+  }
+
+  async blockUser(id: string): Promise<void> {
+    await this.usersRepository.updateById(id, { is_active: false });
+  }
+
   /**
    * GET /users/:id/score
    * Retourne le score de fiabilité d'un utilisateur.
