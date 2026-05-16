@@ -164,7 +164,7 @@ export class AuthService {
   /**
    * POST /auth/login (après passage par LocalStrategy)
    */
-  async login(user: any): Promise<{ access_token: string; refresh_token: string }> {
+  async login(user: any): Promise<{ access_token: string; refresh_token: string; user: any }> {
     const payload = { sub: user.id, phone: user.phone, role: user.role };
 
     const [access_token, refresh_token] = await Promise.all([
@@ -176,10 +176,20 @@ export class AuthService {
       }),
     ]);
 
-    // Enregistrement du refresh token dans Redis (pour pouvoir le révoquer plus tard)
+    // Enregistrement du refresh token dans Redis
     await this.redis.set(`refresh_token:${user.id}`, refresh_token, 'EX', 7 * 24 * 60 * 60);
 
-    return { access_token, refresh_token };
+    return { 
+      access_token, 
+      refresh_token,
+      user: {
+        id: user.id,
+        phone: user.phone,
+        full_name: user.full_name,
+        role: user.role,
+        wallet_address: user.wallet_address
+      }
+    };
   }
 
   /**
@@ -197,7 +207,10 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshToken);
 
       // 3. Génération nouveaux tokens
-      const newPayload = { sub: payload.sub, phone: payload.phone, role: payload.role };
+      const user = await this.usersService.findById(payload.sub);
+      if (!user) throw new UnauthorizedException('USER_NOT_FOUND');
+
+      const newPayload = { sub: user.id, phone: user.phone, role: user.role };
       const [new_access, new_refresh] = await Promise.all([
         this.jwtService.signAsync(newPayload, {
           expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRATION', '15m') as any,
@@ -213,8 +226,16 @@ export class AuthService {
       return {
         access_token: new_access,
         refresh_token: new_refresh,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          full_name: user.full_name,
+          role: user.role,
+          wallet_address: user.wallet_address
+        }
       };
     } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
   }

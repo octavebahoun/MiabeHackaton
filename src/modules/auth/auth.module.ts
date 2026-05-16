@@ -50,10 +50,27 @@ import * as path from 'path';
           }
         }
 
+        // Détermination de l'algorithme et de la clé
+        let algorithm: 'RS256' | 'HS256' = 'RS256';
+        let secretOrKey: string | Buffer = '';
+
+        if (privateKey && privateKey.includes('BEGIN')) {
+          algorithm = 'RS256';
+          secretOrKey = privateKey;
+        } else {
+          algorithm = 'HS256';
+          secretOrKey = configService.get<string>('JWT_SECRET', 'DEVELOPMENT_SECRET_DO_NOT_USE_IN_PROD');
+          console.warn(`⚠️  Utilisation de l'algorithme HS256 car les clés RSA sont absentes ou invalides.`);
+        }
+
         return {
-          privateKey,
-          publicKey,
-          signOptions: { algorithm: 'RS256' },
+          privateKey: algorithm === 'RS256' ? (secretOrKey as string) : undefined,
+          secret: algorithm === 'HS256' ? (secretOrKey as string) : undefined,
+          publicKey: algorithm === 'RS256' ? publicKey : undefined,
+          signOptions: { 
+            algorithm,
+            expiresIn: '24h'
+          },
         };
       },
     }),

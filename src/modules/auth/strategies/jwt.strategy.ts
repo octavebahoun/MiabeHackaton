@@ -29,11 +29,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
     }
 
+    // Détection dynamique de l'algorithme
+    let algorithm: 'RS256' | 'HS256' = 'RS256';
+    let secretOrKey = '';
+
+    if (publicKey && publicKey.includes('BEGIN')) {
+      algorithm = 'RS256';
+      secretOrKey = publicKey;
+    } else {
+      algorithm = 'HS256';
+      secretOrKey = configService.get<string>('JWT_SECRET', 'DEVELOPMENT_SECRET_DO_NOT_USE_IN_PROD');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: publicKey,
-      algorithms: ['RS256'],
+      secretOrKey: secretOrKey,
+      algorithms: [algorithm],
       passReqToCallback: true,
     });
   }
