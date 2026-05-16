@@ -20,7 +20,7 @@ RUN npm run build
 
 # Debug: vérifier que le fichier main.js existe bien
 RUN ls -la /app/dist/ && echo "✅ Build OK" || (echo "❌ dist/ vide !" && exit 1)
-RUN test -f /app/dist/src/main.js && echo "✅ dist/src/main.js trouvé" || (echo "❌ dist/src/main.js MANQUANT" && find /app/dist -name "main.js" && exit 1)
+RUN test -f /app/dist/main.js && echo "✅ dist/main.js trouvé" || (echo "❌ dist/main.js MANQUANT" && find /app/dist -name "main.js" && exit 1)
 
 # ── STAGE 2 : Runner ─────────────────────────────────────────
 FROM node:20-alpine AS runner
@@ -44,4 +44,4 @@ USER nestjs
 EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/src/main"]
+CMD ["node", "dist/main"]
