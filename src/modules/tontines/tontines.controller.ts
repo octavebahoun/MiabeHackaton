@@ -25,26 +25,26 @@ export class TontinesController {
   @Post()
   @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Créer une nouvelle tontine' })
-  async create(@CurrentUser() user: any, @Body() dto: CreateTontineDto) {
-    return this.tontinesService.create(user.sub, dto);
+  async create(@CurrentUser() user: User, @Body() dto: CreateTontineDto) {
+    return this.tontinesService.create(user.id, dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Lister les tontines auxquelles je participe' })
-  async findMyTontines(@CurrentUser() user: any) {
-    return this.tontinesService.findMyTontines(user.sub);
+  async findMyTontines(@CurrentUser() user: User) {
+    return this.tontinesService.findMyTontines(user.id);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'une tontine' })
-  async findById(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.tontinesService.findById(id, user.sub);
+  async findById(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.tontinesService.findById(id, user.id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Modifier une tontine' })
-  async update(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: UpdateTontineDto) {
-    return this.tontinesService.update(id, user.sub, dto);
+  async update(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: UpdateTontineDto) {
+    return this.tontinesService.update(id, user.id, dto);
   }
 
   // ==========================================
@@ -54,28 +54,28 @@ export class TontinesController {
   @Post(':id/open')
   @ApiOperation({ summary: 'Ouvrir la tontine aux inscriptions (ORGANIZER)' })
   @ApiResponse({ status: 200, description: 'Statut passé à OPEN' })
-  async open(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.tontinesService.open(id, user.sub);
+  async open(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.tontinesService.open(id, user.id);
   }
 
   @Post(':id/start')
   @ApiOperation({ summary: 'Démarrer la tontine + déploiement smart contract (ORGANIZER)' })
   @ApiResponse({ status: 200, description: 'Tontine active, déploiement asynchrone lancé' })
-  async start(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.tontinesService.start(id, user.sub);
+  async start(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.tontinesService.start(id, user.id);
   }
 
   @Post(':id/join')
   @ApiOperation({ summary: 'Rejoindre une tontine via son code d\'invitation (USER)' })
   @ApiResponse({ status: 201, description: 'Demande envoyée, statut PENDING' })
-  async join(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: JoinTontineDto) {
-    return this.tontinesService.join(user.sub, id, dto);
+  async join(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: JoinTontineDto) {
+    return this.tontinesService.join(user.id, id, dto);
   }
 
   @Get(':id/members')
   @ApiOperation({ summary: 'Lister tous les membres de la tontine (MEMBER)' })
-  async getMembers(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.tontinesService.getMembers(id, user.sub);
+  async getMembers(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.tontinesService.getMembers(id, user.id);
   }
 
   @Patch(':id/members/:memberId')
@@ -83,19 +83,19 @@ export class TontinesController {
   async updateMemberStatus(
     @Param('id') id: string,
     @Param('memberId') memberId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
     @Body() dto: UpdateMemberDto
   ) {
-    return this.tontinesService.updateMemberStatus(id, memberId, user.sub, dto.status);
+    return this.tontinesService.updateMemberStatus(id, memberId, user.id, dto.status);
   }
 
   /** GET /tontines/:id/cycles — Tous les cycles d'une tontine (MEMBER) */
   @Get(':id/cycles')
   @ApiOperation({ summary: 'Tous les cycles d\'une tontine avec leur statut' })
   @ApiResponse({ status: 200, description: 'Liste ordonnée des cycles' })
-  async getCycles(@Param('id') id: string, @CurrentUser() user: any) {
+  async getCycles(@Param('id') id: string, @CurrentUser() user: User) {
     // Vérification d'appartenance avant de retourner les cycles
-    await this.tontinesService.findById(id, user.sub); // lève ForbiddenException si non-membre
+    await this.tontinesService.findById(id, user.id); // lève ForbiddenException si non-membre
     return this.cyclesService.findByTontine(id);
   }
 }
