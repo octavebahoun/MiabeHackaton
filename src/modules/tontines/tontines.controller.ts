@@ -23,7 +23,7 @@ export class TontinesController {
   ) {}
 
   @Post()
-  @Roles(UserRole.USER)
+  @Roles(UserRole.ORGANIZER, UserRole.ADMIN)
   @ApiOperation({ summary: 'Créer une nouvelle tontine' })
   async create(@CurrentUser() user: any, @Body() dto: CreateTontineDto) {
     return this.tontinesService.create(user.sub, dto);
