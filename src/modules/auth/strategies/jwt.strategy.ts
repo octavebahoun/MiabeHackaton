@@ -15,13 +15,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly usersService: UsersService,
     @InjectRedis() private readonly redis: Redis,
   ) {
-    const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH');
-    let publicKey = '';
-    try {
+    let publicKey = configService.get<string>('JWT_PUBLIC_KEY');
+    
+    if (publicKey) {
+      publicKey = publicKey.replace(/\\n/g, '\n');
+    } else {
+      try {
+        const publicKeyPath = configService.get<string>('JWT_PUBLIC_KEY_PATH');
         publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
-    } catch (e) {
-        console.warn('Could not read JWT_PUBLIC_KEY_PATH, using dummy key for startup');
-        publicKey = 'DUMMY_KEY';
+      } catch (e) {
+        console.warn('⚠️  Clé publique JWT introuvable (env ou fichier). Utilisation clé fictive.');
+        publicKey = 'DUMMY_PUBLIC';
+      }
     }
 
     super({
