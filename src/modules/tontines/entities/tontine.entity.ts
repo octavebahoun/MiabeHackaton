@@ -52,6 +52,12 @@ export class Tontine {
   @Column({ type: 'timestamp', nullable: true })
   start_date: Date;
 
+  @Column({ type: 'int', default: 1 })
+  max_absences: number;
+
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  penalty_amount: number;
+
   @OneToMany(() => TontineMember, (member) => member.tontine)
   members: TontineMember[];
 

@@ -28,4 +28,16 @@ export class CreateTontineDto {
   @IsOptional()
   @IsDateString()
   start_date?: Date;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  max_absences?: number;
+
+  @ApiProperty({ example: 1000, required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  penalty_amount?: number;
 }
