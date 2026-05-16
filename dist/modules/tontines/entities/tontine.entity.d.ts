@@ -24,6 +24,8 @@ export declare class Tontine {
     invitation_code: string;
     contract_address: string;
     start_date: Date;
+    max_absences: number;
+    penalty_amount: number;
     members: TontineMember[];
     created_at: Date;
     updated_at: Date;

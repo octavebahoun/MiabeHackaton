@@ -33,47 +33,47 @@ let TontinesController = class TontinesController {
         this.cyclesService = cyclesService;
     }
     async create(user, dto) {
-        return this.tontinesService.create(user.sub, dto);
+        return this.tontinesService.create(user.id, dto);
     }
     async findMyTontines(user) {
-        return this.tontinesService.findMyTontines(user.sub);
+        return this.tontinesService.findMyTontines(user.id);
     }
     async findById(id, user) {
-        return this.tontinesService.findById(id, user.sub);
+        return this.tontinesService.findById(id, user.id);
     }
     async update(id, user, dto) {
-        return this.tontinesService.update(id, user.sub, dto);
+        return this.tontinesService.update(id, user.id, dto);
     }
     async open(id, user) {
-        return this.tontinesService.open(id, user.sub);
+        return this.tontinesService.open(id, user.id);
     }
     async start(id, user) {
-        return this.tontinesService.start(id, user.sub);
+        return this.tontinesService.start(id, user.id);
     }
     async join(id, user, dto) {
-        return this.tontinesService.join(user.sub, id, dto);
+        return this.tontinesService.join(user.id, id, dto);
     }
     async getMembers(id, user) {
-        return this.tontinesService.getMembers(id, user.sub);
+        return this.tontinesService.getMembers(id, user.id);
     }
     async updateMemberStatus(id, memberId, user, dto) {
-        return this.tontinesService.updateMemberStatus(id, memberId, user.sub, dto.status);
+        return this.tontinesService.updateMemberStatus(id, memberId, user.id, dto.status);
     }
     async getCycles(id, user) {
-        await this.tontinesService.findById(id, user.sub);
+        await this.tontinesService.findById(id, user.id);
         return this.cyclesService.findByTontine(id);
     }
 };
 exports.TontinesController = TontinesController;
 __decorate([
     (0, common_1.Post)(),
-    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.USER),
+    (0, roles_decorator_1.Roles)(user_entity_1.UserRole.ORGANIZER, user_entity_1.UserRole.ADMIN),
     (0, swagger_1.ApiOperation)({ summary: 'Créer une nouvelle tontine' }),
     openapi.ApiResponse({ status: 201, type: require("./entities/tontine.entity").Tontine }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_tontine_dto_1.CreateTontineDto]),
+    __metadata("design:paramtypes", [user_entity_1.User, create_tontine_dto_1.CreateTontineDto]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "create", null);
 __decorate([
@@ -82,7 +82,7 @@ __decorate([
     openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "findMyTontines", null);
 __decorate([
@@ -92,7 +92,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "findById", null);
 __decorate([
@@ -103,7 +103,7 @@ __decorate([
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, update_tontine_dto_1.UpdateTontineDto]),
+    __metadata("design:paramtypes", [String, user_entity_1.User, update_tontine_dto_1.UpdateTontineDto]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "update", null);
 __decorate([
@@ -113,7 +113,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "open", null);
 __decorate([
@@ -123,7 +123,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "start", null);
 __decorate([
@@ -134,7 +134,7 @@ __decorate([
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, join_tontine_dto_1.JoinTontineDto]),
+    __metadata("design:paramtypes", [String, user_entity_1.User, join_tontine_dto_1.JoinTontineDto]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "join", null);
 __decorate([
@@ -144,7 +144,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "getMembers", null);
 __decorate([
@@ -156,7 +156,8 @@ __decorate([
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __param(3, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object, update_member_dto_1.UpdateMemberDto]),
+    __metadata("design:paramtypes", [String, String, user_entity_1.User,
+        update_member_dto_1.UpdateMemberDto]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "updateMemberStatus", null);
 __decorate([
@@ -166,7 +167,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], TontinesController.prototype, "getCycles", null);
 exports.TontinesController = TontinesController = __decorate([

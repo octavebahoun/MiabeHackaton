@@ -16,7 +16,7 @@ const swagger_1 = require("@nestjs/swagger");
 const tontine_entity_1 = require("../entities/tontine.entity");
 class CreateTontineDto {
     static _OPENAPI_METADATA_FACTORY() {
-        return { name: { required: true, type: () => String, minLength: 3, maxLength: 100 }, contribution_amount: { required: true, type: () => Number, minimum: 1000 }, frequency: { required: true, enum: require("../entities/tontine.entity").TontineFrequency }, max_members: { required: true, type: () => Number, minimum: 2, maximum: 50 }, start_date: { required: false, type: () => Date } };
+        return { name: { required: true, type: () => String, minLength: 3, maxLength: 100 }, contribution_amount: { required: true, type: () => Number, minimum: 1000 }, frequency: { required: true, enum: require("../entities/tontine.entity").TontineFrequency }, max_members: { required: true, type: () => Number, minimum: 2, maximum: 50 }, start_date: { required: false, type: () => Date }, max_absences: { required: false, type: () => Number, minimum: 0 }, penalty_amount: { required: false, type: () => Number, minimum: 0 } };
     }
 }
 exports.CreateTontineDto = CreateTontineDto;
@@ -51,4 +51,18 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", Date)
 ], CreateTontineDto.prototype, "start_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1, required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateTontineDto.prototype, "max_absences", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1000, required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateTontineDto.prototype, "penalty_amount", void 0);
 //# sourceMappingURL=create-tontine.dto.js.map

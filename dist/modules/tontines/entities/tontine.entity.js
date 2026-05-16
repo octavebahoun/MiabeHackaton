@@ -30,7 +30,7 @@ var TontineStatus;
 })(TontineStatus || (exports.TontineStatus = TontineStatus = {}));
 let Tontine = class Tontine {
     static _OPENAPI_METADATA_FACTORY() {
-        return { id: { required: true, type: () => String }, name: { required: true, type: () => String }, organizer_id: { required: true, type: () => String }, organizer: { required: true, type: () => require("../../users/entities/user.entity").User }, contribution_amount: { required: true, type: () => Number }, frequency: { required: true, enum: require("./tontine.entity").TontineFrequency }, max_members: { required: true, type: () => Number }, status: { required: true, enum: require("./tontine.entity").TontineStatus }, invitation_code: { required: true, type: () => String }, contract_address: { required: true, type: () => String }, start_date: { required: true, type: () => Date }, members: { required: true, type: () => [require("./tontine-member.entity").TontineMember] }, created_at: { required: true, type: () => Date }, updated_at: { required: true, type: () => Date } };
+        return { id: { required: true, type: () => String }, name: { required: true, type: () => String }, organizer_id: { required: true, type: () => String }, organizer: { required: true, type: () => require("../../users/entities/user.entity").User }, contribution_amount: { required: true, type: () => Number }, frequency: { required: true, enum: require("./tontine.entity").TontineFrequency }, max_members: { required: true, type: () => Number }, status: { required: true, enum: require("./tontine.entity").TontineStatus }, invitation_code: { required: true, type: () => String }, contract_address: { required: true, type: () => String }, start_date: { required: true, type: () => Date }, max_absences: { required: true, type: () => Number }, penalty_amount: { required: true, type: () => Number }, members: { required: true, type: () => [require("./tontine-member.entity").TontineMember] }, created_at: { required: true, type: () => Date }, updated_at: { required: true, type: () => Date } };
     }
 };
 exports.Tontine = Tontine;
@@ -79,6 +79,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Date)
 ], Tontine.prototype, "start_date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', default: 1 }),
+    __metadata("design:type", Number)
+], Tontine.prototype, "max_absences", void 0);
+__decorate([
+    (0, typeorm_1.Column)('decimal', { precision: 12, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], Tontine.prototype, "penalty_amount", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => tontine_member_entity_1.TontineMember, (member) => member.tontine),
     __metadata("design:type", Array)

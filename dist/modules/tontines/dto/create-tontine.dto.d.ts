@@ -5,4 +5,6 @@ export declare class CreateTontineDto {
     frequency: TontineFrequency;
     max_members: number;
     start_date?: Date;
+    max_absences?: number;
+    penalty_amount?: number;
 }

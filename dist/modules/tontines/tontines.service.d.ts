@@ -27,6 +27,8 @@ export declare class TontinesService {
         invitation_code: string;
         contract_address: string;
         start_date: Date;
+        max_absences: number;
+        penalty_amount: number;
         members: import("./entities/tontine-member.entity").TontineMember[];
         created_at: Date;
         updated_at: Date;
