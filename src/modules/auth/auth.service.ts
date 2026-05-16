@@ -60,6 +60,7 @@ export class AuthService {
         phone: dto.phone,
         password_hash,
         full_name: dto.full_name,
+        role: dto.role as any,
       });
 
       // 4. Génération OTP (6 chiffres)
@@ -216,6 +217,29 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
+  }
+
+  /**
+   * POST /auth/resend-otp
+   */
+  async resendOtp(phone: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByPhone(phone);
+    if (!user) throw new NotFoundException('USER_NOT_FOUND');
+    if (user.is_active) throw new BadRequestException('ACCOUNT_ALREADY_ACTIVATED');
+
+    const otp = generateOtp();
+    const hashedOtp = hashOtp(otp);
+    await this.redis.set(`otp:${phone}`, hashedOtp, 'EX', 600);
+
+    await this.notificationsQueue.add('send-sms', {
+      type: 'sms',
+      payload: {
+        to: phone,
+        message: `TontineChain - Votre nouveau code de vérification (OTP) est : ${otp}.`,
+      }
+    });
+
+    return { message: 'OTP_RESENT' };
   }
 
   /**

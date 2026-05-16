@@ -24,7 +24,7 @@ export class BlockchainService implements OnModuleInit {
   // ──────────────────────────────────────────────
 
   private initProvider() {
-    const rpcUrl = this.config.get<string>('POLYGON_RPC_URL', 'https://rpc-mumbai.maticvigil.com');
+    const rpcUrl = this.config.get<string>('POLYGON_RPC_URL', 'https://rpc-amoy.polygon.technology');
     const privateKey = this.config.get<string>('BACKEND_WALLET_PRIVATE_KEY');
 
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -61,7 +61,7 @@ export class BlockchainService implements OnModuleInit {
     } catch (e) {
       this.logger.error('Erreur provider principal', e.message);
       // Failover vers RPC public
-      const fallbackProvider = new ethers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
+      const fallbackProvider = new ethers.JsonRpcProvider('https://rpc-amoy.polygon.technology');
       return fallbackProvider.getBlockNumber();
     }
   }

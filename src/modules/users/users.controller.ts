@@ -54,7 +54,7 @@ export class UsersController {
    */
   @Get(':id/score')
   @ApiOperation({ summary: 'Score de fiabilité d\'un utilisateur' })
-  @ApiResponse({ status: 200, description: '{ user_id, full_name, credit_score, score_label }' })
+  @ApiResponse({ status: 200, description: '{ user_id, full_name, score, level, total_contributions, ... }' })
   @ApiResponse({ status: 404, description: 'Utilisateur introuvable' })
   async getScore(@Param('id') targetId: string, @CurrentUser() user: User) {
     return this.usersService.getScoreById(user.id, targetId);

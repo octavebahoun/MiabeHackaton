@@ -34,6 +34,14 @@ export class AuthController {
   }
 
   @Public()
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renvoyer le code OTP par SMS' })
+  async resendOtp(@Body('phone') phone: string) {
+    return this.authService.resendOtp(phone);
+  }
+
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)

@@ -19,7 +19,7 @@ let ScoreService = ScoreService_1 = class ScoreService {
         this.logger = new common_1.Logger(ScoreService_1.name);
     }
     async addPositiveScore(userId) {
-        this.logger.log(`Ajout de points positifs pour l'utilisateur ${userId}`);
+        this.logger.log(`Ajout positifs pour l'utilisateur ${userId}`);
         try {
             const user = await this.usersService.findById(userId);
             const currentScore = user.credit_score || 500;

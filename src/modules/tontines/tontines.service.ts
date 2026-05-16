@@ -8,6 +8,8 @@ import { TontineStatus } from './entities/tontine.entity';
 import { CyclesService } from '../cycles/cycles.service';
 import * as crypto from 'crypto';
 
+import { Contribution, ContributionStatus } from '../contributions/entities/contribution.entity';
+
 @Injectable()
 export class TontinesService {
   constructor(
@@ -47,7 +49,29 @@ export class TontinesService {
       where: { user_id: userId },
       relations: ['tontine'],
     });
-    return memberships.map(m => m.tontine);
+
+    const result = await Promise.all(memberships.map(async (m) => {
+      const tontine = m.tontine;
+      const currentCycle = await this.cyclesService.getCurrentCycle(tontine.id);
+      
+      let my_contribution_status = 'NONE';
+      if (currentCycle) {
+        const contribution = await this.repository.tontineRepo.manager.findOne(Contribution, {
+          where: { cycle_id: currentCycle.id, member_id: userId, status: ContributionStatus.CONFIRMED }
+        });
+        my_contribution_status = contribution ? 'PAID' : 'PENDING';
+      }
+
+      return {
+        ...tontine,
+        my_role: m.role,
+        my_status: m.status,
+        current_cycle: currentCycle,
+        my_contribution_status,
+      };
+    }));
+
+    return result;
   }
 
   async findById(tontineId: string, userId: string) {

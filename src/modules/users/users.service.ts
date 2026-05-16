@@ -56,11 +56,15 @@ export class UsersService {
    * Le score est calculé par le ScoreService en fond et mis à jour en DB.
    * Ici on le lit directement (lecture rapide, pas de calcul à la volée).
    */
-  async getScoreById(requesterId: string, targetUserId: string): Promise<{
+  async getScoreById(userId: string, targetUserId: string): Promise<{
     user_id: string;
     full_name: string;
-    credit_score: number;
-    score_label: string;
+    score: number;
+    level: string;
+    total_contributions: number;
+    on_time: number;
+    late: number;
+    completed_tontines: number;
   }> {
     const target = await this.findById(targetUserId);
 
@@ -77,8 +81,12 @@ export class UsersService {
     return {
       user_id: target.id,
       full_name: target.full_name,
-      credit_score: score,
-      score_label,
+      score: score,
+      level: score_label.toUpperCase(),
+      total_contributions: 0, // Placeholder
+      on_time: 0,            // Placeholder
+      late: 0,               // Placeholder
+      completed_tontines: 0, // Placeholder
     };
   }
 }

@@ -21,4 +21,9 @@ export class RegisterDto {
   @MinLength(2)
   @MaxLength(100)
   full_name: string;
+
+  @ApiProperty({ example: 'ORGANIZER', enum: ['USER', 'ORGANIZER'], description: 'Rôle de l\'utilisateur' })
+  @IsString()
+  @IsNotEmpty()
+  role: string;
 }
