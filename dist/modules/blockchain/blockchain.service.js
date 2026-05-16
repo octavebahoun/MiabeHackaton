@@ -59,7 +59,7 @@ let BlockchainService = BlockchainService_1 = class BlockchainService {
         this.loadAbis();
     }
     initProvider() {
-        const rpcUrl = this.config.get('POLYGON_RPC_URL', 'https://rpc-mumbai.maticvigil.com');
+        const rpcUrl = this.config.get('POLYGON_RPC_URL', 'https://rpc-amoy.polygon.technology');
         const privateKey = this.config.get('BACKEND_WALLET_PRIVATE_KEY');
         this.provider = new ethers_1.ethers.JsonRpcProvider(rpcUrl);
         if (privateKey) {
@@ -90,7 +90,7 @@ let BlockchainService = BlockchainService_1 = class BlockchainService {
         }
         catch (e) {
             this.logger.error('Erreur provider principal', e.message);
-            const fallbackProvider = new ethers_1.ethers.JsonRpcProvider('https://rpc-mumbai.maticvigil.com');
+            const fallbackProvider = new ethers_1.ethers.JsonRpcProvider('https://rpc-amoy.polygon.technology');
             return fallbackProvider.getBlockNumber();
         }
     }

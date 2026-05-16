@@ -15,7 +15,7 @@ const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 class RegisterDto {
     static _OPENAPI_METADATA_FACTORY() {
-        return { phone: { required: true, type: () => String, pattern: "^\\+[1-9]\\d{1,14}$" }, password: { required: true, type: () => String, minLength: 8, pattern: "((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$" }, full_name: { required: true, type: () => String, minLength: 2, maxLength: 100 } };
+        return { phone: { required: true, type: () => String, pattern: "^\\+[1-9]\\d{1,14}$" }, password: { required: true, type: () => String, minLength: 8, pattern: "((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$" }, full_name: { required: true, type: () => String, minLength: 2, maxLength: 100 }, role: { required: true, type: () => String } };
     }
 }
 exports.RegisterDto = RegisterDto;
@@ -42,4 +42,10 @@ __decorate([
     (0, class_validator_1.MaxLength)(100),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "full_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'ORGANIZER', enum: ['USER', 'ORGANIZER'], description: 'Rôle de l\'utilisateur' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "role", void 0);
 //# sourceMappingURL=register.dto.js.map

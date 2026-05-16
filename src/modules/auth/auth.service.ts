@@ -195,7 +195,7 @@ export class AuthService {
   /**
    * POST /auth/refresh
    */
-  async refreshTokens(userId: string, refreshToken: string): Promise<{ access_token: string; refresh_token: string }> {
+  async refreshTokens(userId: string, refreshToken: string): Promise<{ access_token: string; refresh_token: string; user: any }> {
     // 1. Vérification dans Redis
     const storedToken = await this.redis.get(`refresh_token:${userId}`);
     if (!storedToken || storedToken !== refreshToken) {

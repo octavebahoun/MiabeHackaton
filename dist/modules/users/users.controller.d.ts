@@ -12,8 +12,12 @@ export declare class UsersController {
     getScore(targetId: string, user: User): Promise<{
         user_id: string;
         full_name: string;
-        credit_score: number;
-        score_label: string;
+        score: number;
+        level: string;
+        total_contributions: number;
+        on_time: number;
+        late: number;
+        completed_tontines: number;
     }>;
 }
 export {};

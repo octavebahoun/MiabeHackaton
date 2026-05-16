@@ -89,6 +89,7 @@ let AuthService = class AuthService {
                 phone: dto.phone,
                 password_hash,
                 full_name: dto.full_name,
+                role: dto.role,
             });
             const otp = (0, crypto_util_1.generateOtp)();
             const hashedOtp = (0, crypto_util_1.hashOtp)(otp);
@@ -166,7 +167,17 @@ let AuthService = class AuthService {
             }),
         ]);
         await this.redis.set(`refresh_token:${user.id}`, refresh_token, 'EX', 7 * 24 * 60 * 60);
-        return { access_token, refresh_token };
+        return {
+            access_token,
+            refresh_token,
+            user: {
+                id: user.id,
+                phone: user.phone,
+                full_name: user.full_name,
+                role: user.role,
+                wallet_address: user.wallet_address
+            }
+        };
     }
     async refreshTokens(userId, refreshToken) {
         const storedToken = await this.redis.get(`refresh_token:${userId}`);
@@ -175,7 +186,10 @@ let AuthService = class AuthService {
         }
         try {
             const payload = await this.jwtService.verifyAsync(refreshToken);
-            const newPayload = { sub: payload.sub, phone: payload.phone, role: payload.role };
+            const user = await this.usersService.findById(payload.sub);
+            if (!user)
+                throw new common_1.UnauthorizedException('USER_NOT_FOUND');
+            const newPayload = { sub: user.id, phone: user.phone, role: user.role };
             const [new_access, new_refresh] = await Promise.all([
                 this.jwtService.signAsync(newPayload, {
                     expiresIn: this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
@@ -188,11 +202,38 @@ let AuthService = class AuthService {
             return {
                 access_token: new_access,
                 refresh_token: new_refresh,
+                user: {
+                    id: user.id,
+                    phone: user.phone,
+                    full_name: user.full_name,
+                    role: user.role,
+                    wallet_address: user.wallet_address
+                }
             };
         }
         catch (e) {
+            if (e instanceof common_1.UnauthorizedException)
+                throw e;
             throw new common_1.UnauthorizedException('INVALID_REFRESH_TOKEN');
         }
+    }
+    async resendOtp(phone) {
+        const user = await this.usersService.findByPhone(phone);
+        if (!user)
+            throw new common_1.NotFoundException('USER_NOT_FOUND');
+        if (user.is_active)
+            throw new common_1.BadRequestException('ACCOUNT_ALREADY_ACTIVATED');
+        const otp = (0, crypto_util_1.generateOtp)();
+        const hashedOtp = (0, crypto_util_1.hashOtp)(otp);
+        await this.redis.set(`otp:${phone}`, hashedOtp, 'EX', 600);
+        await this.notificationsQueue.add('send-sms', {
+            type: 'sms',
+            payload: {
+                to: phone,
+                message: `TontineChain - Votre nouveau code de vérification (OTP) est : ${otp}.`,
+            }
+        });
+        return { message: 'OTP_RESENT' };
     }
     async logout(userId, accessToken) {
         try {

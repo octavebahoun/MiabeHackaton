@@ -79,7 +79,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lister les tontines auxquelles je participe' }),
-    openapi.ApiResponse({ status: 200, type: [require("./entities/tontine.entity").Tontine] }),
+    openapi.ApiResponse({ status: 200 }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

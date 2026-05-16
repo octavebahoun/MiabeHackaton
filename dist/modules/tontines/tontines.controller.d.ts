@@ -9,7 +9,26 @@ export declare class TontinesController {
     private readonly cyclesService;
     constructor(tontinesService: TontinesService, cyclesService: CyclesService);
     create(user: any, dto: CreateTontineDto): Promise<import("./entities/tontine.entity").Tontine>;
-    findMyTontines(user: any): Promise<import("./entities/tontine.entity").Tontine[]>;
+    findMyTontines(user: any): Promise<{
+        my_role: import("./entities/tontine-member.entity").MemberRole;
+        my_status: import("./entities/tontine-member.entity").MemberStatus;
+        current_cycle: import("../cycles/entities/cycle.entity").Cycle;
+        my_contribution_status: string;
+        id: string;
+        name: string;
+        organizer_id: string;
+        organizer: import("../users/entities/user.entity").User;
+        contribution_amount: number;
+        frequency: import("./entities/tontine.entity").TontineFrequency;
+        max_members: number;
+        status: import("./entities/tontine.entity").TontineStatus;
+        invitation_code: string;
+        contract_address: string;
+        start_date: Date;
+        members: import("./entities/tontine-member.entity").TontineMember[];
+        created_at: Date;
+        updated_at: Date;
+    }[]>;
     findById(id: string, user: any): Promise<import("./entities/tontine.entity").Tontine>;
     update(id: string, user: any, dto: UpdateTontineDto): Promise<import("./entities/tontine.entity").Tontine>;
     open(id: string, user: any): Promise<{

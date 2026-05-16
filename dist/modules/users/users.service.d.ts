@@ -15,10 +15,14 @@ export declare class UsersService {
     updateCreditScore(id: string, score: number): Promise<void>;
     updateKycStatus(id: string, status: any): Promise<void>;
     blockUser(id: string): Promise<void>;
-    getScoreById(requesterId: string, targetUserId: string): Promise<{
+    getScoreById(userId: string, targetUserId: string): Promise<{
         user_id: string;
         full_name: string;
-        credit_score: number;
-        score_label: string;
+        score: number;
+        level: string;
+        total_contributions: number;
+        on_time: number;
+        late: number;
+        completed_tontines: number;
     }>;
 }

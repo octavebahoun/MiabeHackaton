@@ -60,20 +60,35 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
     constructor(configService, usersService, redis) {
-        const publicKeyPath = configService.get('JWT_PUBLIC_KEY_PATH');
-        let publicKey = '';
-        try {
-            publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
+        let publicKey = configService.get('JWT_PUBLIC_KEY');
+        if (publicKey) {
+            publicKey = publicKey.replace(/\\n/g, '\n');
         }
-        catch (e) {
-            console.warn('Could not read JWT_PUBLIC_KEY_PATH, using dummy key for startup');
-            publicKey = 'DUMMY_KEY';
+        else {
+            try {
+                const publicKeyPath = configService.get('JWT_PUBLIC_KEY_PATH');
+                publicKey = fs.readFileSync(path.resolve(process.cwd(), publicKeyPath), 'utf8');
+            }
+            catch (e) {
+                console.warn('⚠️  Clé publique JWT introuvable (env ou fichier). Utilisation clé fictive.');
+                publicKey = 'DUMMY_PUBLIC';
+            }
+        }
+        let algorithm = 'RS256';
+        let secretOrKey = '';
+        if (publicKey && publicKey.includes('BEGIN')) {
+            algorithm = 'RS256';
+            secretOrKey = publicKey;
+        }
+        else {
+            algorithm = 'HS256';
+            secretOrKey = configService.get('JWT_SECRET', 'DEVELOPMENT_SECRET_DO_NOT_USE_IN_PROD');
         }
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: publicKey,
-            algorithms: ['RS256'],
+            secretOrKey: secretOrKey,
+            algorithms: [algorithm],
             passReqToCallback: true,
         });
         this.configService = configService;

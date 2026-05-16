@@ -13,13 +13,18 @@ export declare class AuthController {
         message: string;
         user_id: string;
     }>;
+    resendOtp(phone: string): Promise<{
+        message: string;
+    }>;
     login(req: any, dto: LoginDto): Promise<{
         access_token: string;
         refresh_token: string;
+        user: any;
     }>;
     refreshTokens(refreshToken: string, userId: string): Promise<{
         access_token: string;
         refresh_token: string;
+        user: any;
     }>;
     logout(req: any, authHeader: string): Promise<{
         message: string;

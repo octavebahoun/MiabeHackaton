@@ -26,10 +26,15 @@ export declare class AuthService {
     login(user: any): Promise<{
         access_token: string;
         refresh_token: string;
+        user: any;
     }>;
     refreshTokens(userId: string, refreshToken: string): Promise<{
         access_token: string;
         refresh_token: string;
+        user: any;
+    }>;
+    resendOtp(phone: string): Promise<{
+        message: string;
     }>;
     logout(userId: string, accessToken: string): Promise<void>;
 }

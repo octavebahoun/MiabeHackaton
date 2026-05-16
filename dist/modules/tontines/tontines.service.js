@@ -52,6 +52,7 @@ const tontine_member_entity_1 = require("./entities/tontine-member.entity");
 const tontine_entity_1 = require("./entities/tontine.entity");
 const cycles_service_1 = require("../cycles/cycles.service");
 const crypto = __importStar(require("crypto"));
+const contribution_entity_1 = require("../contributions/entities/contribution.entity");
 let TontinesService = class TontinesService {
     constructor(repository, cyclesService) {
         this.repository = repository;
@@ -84,7 +85,25 @@ let TontinesService = class TontinesService {
             where: { user_id: userId },
             relations: ['tontine'],
         });
-        return memberships.map(m => m.tontine);
+        const result = await Promise.all(memberships.map(async (m) => {
+            const tontine = m.tontine;
+            const currentCycle = await this.cyclesService.getCurrentCycle(tontine.id);
+            let my_contribution_status = 'NONE';
+            if (currentCycle) {
+                const contribution = await this.repository.tontineRepo.manager.findOne(contribution_entity_1.Contribution, {
+                    where: { cycle_id: currentCycle.id, member_id: userId, status: contribution_entity_1.ContributionStatus.CONFIRMED }
+                });
+                my_contribution_status = contribution ? 'PAID' : 'PENDING';
+            }
+            return {
+                ...tontine,
+                my_role: m.role,
+                my_status: m.status,
+                current_cycle: currentCycle,
+                my_contribution_status,
+            };
+        }));
+        return result;
     }
     async findById(tontineId, userId) {
         const tontine = await this.repository.tontineRepo.findOne({

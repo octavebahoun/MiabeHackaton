@@ -33,6 +33,9 @@ let AuthController = class AuthController {
     async verifyOtp(dto) {
         return this.authService.verifyOtp(dto);
     }
+    async resendOtp(phone) {
+        return this.authService.resendOtp(phone);
+    }
     async login(req, dto) {
         return this.authService.login(req.user);
     }
@@ -69,6 +72,17 @@ __decorate([
     __metadata("design:paramtypes", [verify_otp_dto_1.VerifyOtpDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verifyOtp", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('resend-otp'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Renvoyer le code OTP par SMS' }),
+    openapi.ApiResponse({ status: common_1.HttpStatus.OK }),
+    __param(0, (0, common_1.Body)('phone')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resendOtp", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.UseGuards)(local_auth_guard_1.LocalAuthGuard),

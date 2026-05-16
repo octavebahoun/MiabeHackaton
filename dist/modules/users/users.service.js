@@ -50,7 +50,7 @@ let UsersService = class UsersService {
     async blockUser(id) {
         await this.usersRepository.updateById(id, { is_active: false });
     }
-    async getScoreById(requesterId, targetUserId) {
+    async getScoreById(userId, targetUserId) {
         const target = await this.findById(targetUserId);
         let score_label;
         const score = Number(target.credit_score ?? 0);
@@ -67,8 +67,12 @@ let UsersService = class UsersService {
         return {
             user_id: target.id,
             full_name: target.full_name,
-            credit_score: score,
-            score_label,
+            score: score,
+            level: score_label.toUpperCase(),
+            total_contributions: 0,
+            on_time: 0,
+            late: 0,
+            completed_tontines: 0,
         };
     }
 };

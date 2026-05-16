@@ -74,7 +74,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id/score'),
     (0, swagger_1.ApiOperation)({ summary: 'Score de fiabilité d\'un utilisateur' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: '{ user_id, full_name, credit_score, score_label }' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '{ user_id, full_name, score, level, total_contributions, ... }' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Utilisateur introuvable' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
